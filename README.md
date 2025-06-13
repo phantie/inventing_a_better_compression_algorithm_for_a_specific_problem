@@ -415,3 +415,7 @@ From this we can see that memory consumption with `k=20` is:
 
 - 160 bytes without compression
 - 14 bytes with compression (and benefits are more significant with larger `k`)
+
+## Conclusion
+
+Rarely you solve really interesting problems (or challenge yourself this way), but coming up with your own compression algorithm is in the space of *interesting problems*. It brings a lot of satifaction, when it works. Especially as part of a larger process, that you can't even believe it, if it works from the first try.
