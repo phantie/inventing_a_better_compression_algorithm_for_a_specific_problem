@@ -395,7 +395,7 @@ A function without compression:
 y = 8 bytes * k
 ```
 
-![uncompressed](/static/articles/engineering/inventing_a_better_compression_algorithm_for_a_specific_problem/images/uncompressed.jpg)
+![uncompressed](https://github.com/user-attachments/assets/5d7b00f1-c5d4-4469-82b4-12d05547d059)
 
 A function with compression:
 
@@ -403,7 +403,7 @@ A function with compression:
 y = max(0, sign(k)) * 8 bytes + ceil((k - 1) / 4) bytes + 1 byte
 ```
 
-![compressed](/static/articles/engineering/inventing_a_better_compression_algorithm_for_a_specific_problem/images/compressed.jpg)
+![compressed](https://github.com/user-attachments/assets/20163933-5757-4edf-9d67-956bc1a02c75)
 
 From this we can see that memory consumption with `k=20` is:
 
