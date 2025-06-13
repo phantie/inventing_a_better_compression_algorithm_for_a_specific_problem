@@ -403,7 +403,7 @@ A function without compression:
 y = 8 bytes * k
 ```
 
-<!-- insert plot with k = 20 -->
+![uncompressed](https://github.com/user-attachments/assets/5d7b00f1-c5d4-4469-82b4-12d05547d059)
 
 A function with compression:
 
@@ -411,7 +411,7 @@ A function with compression:
 y = max(0, sign(k)) * 8 bytes + ceil((k - 1) / 4) bytes + 1 byte
 ```
 
-<!-- insert plot with k = 20 -->
+![compressed](https://github.com/user-attachments/assets/20163933-5757-4edf-9d67-956bc1a02c75)
 
 From this we can see that memory consumption with `k=20` is:
 
