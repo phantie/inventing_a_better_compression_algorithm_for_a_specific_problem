@@ -421,3 +421,5 @@ From this we can see that memory consumption with `k=20` is:
 ## Conclusion
 
 Rarely do you solve really interesting problems (or challenge yourself this way), but coming up with your own compression algorithm is in the space of *interesting problems*. It brings a lot of satisfaction when it works. Especially as part of a larger process, that you can't even believe it if it works from the first try.
+
+### Supplanting to the article code [repository](https://github.com/phantie/inventing_a_better_compression_algorithm_for_a_specific_problem)
