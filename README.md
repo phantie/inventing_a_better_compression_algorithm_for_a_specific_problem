@@ -139,12 +139,6 @@ let positions: &[Pos] = [
 
 **So we'll use immutable slices of sequences consisting of pairs of `x` and `y` coordinates represented as `i32` composed in `struct`s named `Pos`.**
 
-[^1]: Because: firstly, we don't even consider optimizations yet - we need to get stuff done; and secondly it's just *one of the views* on the same *data* - we could transform it for more convenience later. Later - when we'll deal with compression.
-
-[^2]: [https://en.wikipedia.org/wiki/Product_type](https://en.wikipedia.org/wiki/Product_type)
-
-[^3]: [https://doc.rust-lang.org/reference/type-layout.html](https://doc.rust-lang.org/reference/type-layout.html)
-
 ### Memory Estimations of Current Representation
 
 An instance of `Pos` size is 2 `i32` sizes. So *2 * 4 bytes = 8 bytes*.
@@ -259,8 +253,6 @@ let consequent_directions =
 So compared to the previous representation which took *8 bytes * 4 = 32 bytes*, this one takes *8 bytes + 2 bits \* 3 = 8.75 bytes*.
 
 And the longer a snake - the more beneficial such optimization, since the starting point is the most expensive.
-
-[^4]: [https://en.wikipedia.org/wiki/Tagged_union](https://en.wikipedia.org/wiki/Tagged_union)
 
 ## Let's define our custom packing format in terms of packing and unpacking functions
 
@@ -403,7 +395,7 @@ A function without compression:
 y = 8 bytes * k
 ```
 
-![uncompressed](https://github.com/user-attachments/assets/5d7b00f1-c5d4-4469-82b4-12d05547d059)
+![uncompressed](/static/articles/engineering/inventing_a_better_compression_algorithm_for_a_specific_problem/images/uncompressed.jpg)
 
 A function with compression:
 
@@ -411,7 +403,7 @@ A function with compression:
 y = max(0, sign(k)) * 8 bytes + ceil((k - 1) / 4) bytes + 1 byte
 ```
 
-![compressed](https://github.com/user-attachments/assets/20163933-5757-4edf-9d67-956bc1a02c75)
+![compressed](/static/articles/engineering/inventing_a_better_compression_algorithm_for_a_specific_problem/images/compressed.jpg)
 
 From this we can see that memory consumption with `k=20` is:
 
@@ -423,3 +415,13 @@ From this we can see that memory consumption with `k=20` is:
 Rarely do you solve really interesting problems (or challenge yourself this way), but coming up with your own compression algorithm is in the space of *interesting problems*. It brings a lot of satisfaction when it works. Especially as part of a larger process, that you can't even believe it if it works from the first try.
 
 ### Supplanting to the article code [repository](https://github.com/phantie/inventing_a_better_compression_algorithm_for_a_specific_problem)
+
+---
+
+[^1]: Because: firstly, we don't even consider optimizations yet - we need to get stuff done; and secondly it's just *one of the views* on the same *data* - we could transform it for more convenience later. Later - when we'll deal with compression.
+
+[^2]: [https://en.wikipedia.org/wiki/Product_type](https://en.wikipedia.org/wiki/Product_type)
+
+[^3]: [https://doc.rust-lang.org/reference/type-layout.html](https://doc.rust-lang.org/reference/type-layout.html)
+
+[^4]: [https://en.wikipedia.org/wiki/Tagged_union](https://en.wikipedia.org/wiki/Tagged_union)
