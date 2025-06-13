@@ -7,7 +7,7 @@ use super::defs::direction::Direction;
 //
 // since last partition of directions can contain 1 to 4 values
 // serializer pads such byte with zeroes
-// deserializer requires to know how many directions to decode the last byte
+// deserializer requires to know how many directions were encoded in the last byte
 //
 pub fn pack_values(values: &[Direction]) -> Vec<u8> {
     let mut result = Vec::with_capacity((values.len() + 3) / 4);
@@ -39,8 +39,8 @@ mod tests {
     #[test]
     fn test_pack_values() {
         assert_eq!(
-            pack_values(&[Direction::Up, Direction::Right, Direction::Down]),
-            vec![0b00_11_01_00]
+            pack_values(&[Direction::Right, Direction::Right, Direction::Down]),
+            vec![0b11_11_01_00]
         );
     }
 }

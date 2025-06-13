@@ -45,8 +45,8 @@ mod tests {
     #[test]
     fn test_unpack_values() {
         assert_eq!(
-            unpack_values(&vec![0b00_11_01_00], 3),
-            vec![Direction::Up, Direction::Right, Direction::Down]
+            unpack_values(&vec![0b11_11_01_00], 3),
+            vec![Direction::Right, Direction::Right, Direction::Down]
         );
     }
 }

@@ -261,3 +261,114 @@ So compared to the previous representation which took *8 bytes * 4 = 32 bytes*, 
 And the longer a snake - more beneficial such optimization, since the starting point is most expensive.
 
 [^4]: [https://en.wikipedia.org/wiki/Tagged_union](https://en.wikipedia.org/wiki/Tagged_union)
+
+## Let's define our custom packing format in terms of packing and unpacking functions
+
+There's no good reason to pack the starting point:
+
+- less reusable, because a starting point can take variable size, here we chose `i32`
+- coupling of compressable (`Direction`) and uncompressable (`Pos`) data
+
+```rust
+// packs sequence of directions to sequence of bytes
+//
+// each Direction is encoded using 2 bits because there are 4 values
+// 4 directions can be encoded using 1 byte
+//
+// since last partition of directions can contain 1 to 4 values
+// serializer pads such byte with zeroes
+// deserializer requires to know how many directions were encoded in the last byte
+//
+pub fn pack_values(values: &[Direction]) -> Vec<u8> {
+    let mut result = Vec::with_capacity((values.len() + 3) / 4);
+
+    for chunk in values.chunks(4) {
+        // start with empty byte
+        let mut byte = 0u8;
+
+        for dir in chunk {
+            // move to left, leaving 2 bits of space
+            byte <<= 2;
+            // use bit OR to append 2 bit value to the end
+            byte |= dir.encode();
+        }
+
+        // pad zeroes when chunk length is less than 4
+        byte <<= 2 * (4 - chunk.len());
+
+        result.push(byte);
+    }
+
+    result
+}
+
+#[test]
+fn test_pack_values() {
+    assert_eq!(
+        pack_values(&[Direction::Right, Direction::Right, Direction::Down]),
+        vec![0b11_11_01_00]
+    );
+}
+
+pub fn unpack_values(bytes: &[u8], values_in_last_byte: u8) -> Vec<Direction> {
+    let mut result = Vec::with_capacity(bytes.len() * 4);
+
+    fn decode_byte(byte: u8, contains: u8) -> Vec<Direction> {
+        let mut result = vec![];
+
+        assert!(contains >= 1);
+        assert!(contains <= 4);
+
+        for i in 0..contains {
+            let mask_shift = 6 - (2 * i);
+
+            let mask = 0b11 << mask_shift;
+
+            // extract bits using:
+            // shifted 0b11 with & (removing bits to the left and right of the mask)
+            // and then bit shift to the right to mask shift size
+            // leaving you with a byte not exceeding decimal value 4 (2 bits)
+            let dir_encoded = (byte & mask) >> mask_shift;
+            result.push(Direction::decode(dir_encoded).unwrap()); // TODO handle unwrap
+        }
+
+        result
+    }
+
+    for (i, byte) in bytes.into_iter().enumerate() {
+        let contains = if i == bytes.len() - 1 {
+            values_in_last_byte
+        } else {
+            4u8
+        };
+
+        result.extend(decode_byte(*byte, contains));
+    }
+
+    result
+}
+
+#[test]
+fn test_unpack_values() {
+    assert_eq!(
+        unpack_values(&vec![0b11_11_01_00], 3),
+        vec![Direction::Right, Direction::Right, Direction::Down]
+    );
+}
+
+```
+
+### Having all this we can
+
+- encode a snake having 2 values:
+  - starting position
+  - consequent directions
+
+- decode a snake having 3 values:
+  - starting position
+  - packed consequent directions (where the optimization lies)
+  - how many directions are in the last byte of packed directions
+
+## Our custom compression format is done
+
+...
