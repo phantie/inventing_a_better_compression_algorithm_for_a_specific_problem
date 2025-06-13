@@ -8,14 +8,14 @@ A game of snake. We are only interested that it can be represented as a sequence
 
 Each coordinate is a pair of numbers representing a position:
 
-- The first number is the X position (horizontal)
-- The second number is the Y position (vertical)
+* The first number is the X position (horizontal)
+* The second number is the Y position (vertical)
 
 ```python
 (2, 1)  # means X = 2, Y = 1
 ```
 
-## Let's take this example to demonstrate typical enconding
+## Let's take this example to demonstrate typical encoding
 
 Consider this snake on a grid:
 
@@ -34,7 +34,7 @@ This snake is represented as where H is the head and ● represents body segment
 [(2,1), (3,1), (4,1), (4,2)]
 ```
 
-But what how much memory it takes?
+But how much memory does it take?
 
 ## Sailing to the land of Rusty Crabs
 
@@ -46,42 +46,42 @@ We need to decide on the *first*[^1] representation of this sequence in Rust.
 
 ## Take a top-down approach at decomposing this representation
 
-1. it's a sequence
-2. a sequence of pairs
-3. a pair of `x` and `y` positions
+1. It's a sequence
+2. A sequence of pairs
+3. A pair of `x` and `y` positions
 4. `x` position
 5. `y` position
 
-From here we take a bottom-top approach:
+From here we take a bottom-up approach:
 
 ### `x` position and `y` position
 
-- no reason for them to take differing amounts of memory
-- it must be in the space of both negative and positive numbers, so we have few *built-in* choices
-  - `isize`: pointer-sized signed integer (32-bit on 32-bit systems, 64-bit on 64-bit systems)
-    - type not to be used in this context
-  - `i8`: 8-bit signed integer (-128 to 127)
-    - likely too small
-  - `i16`: 16-bit signed integer (-32,768 to 32,767)
-    - might suffice, but risky if requirements change
-  - `i32`: 32-bit signed integer (-2,147,483,648 to 2,147,483,647)
-    - sweet spot
-  - `i64`: 64-bit signed integer (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807)
-    - clearly too large
+* No reason for them to take differing amounts of memory
+* It must be in the space of both negative and positive numbers, so we have few *built-in* choices:
+  * `isize`: pointer-sized signed integer (32-bit on 32-bit systems, 64-bit on 64-bit systems)
+    * Type not to be used in this context
+  * `i8`: 8-bit signed integer (-128 to 127)
+    * Likely too small
+  * `i16`: 16-bit signed integer (-32,768 to 32,767)
+    * Might suffice, but risky if requirements change
+  * `i32`: 32-bit signed integer (-2,147,483,648 to 2,147,483,647)
+    * Sweet spot
+  * `i64`: 64-bit signed integer (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807)
+    * Clearly too large
 
 *So choose `i32` for both `x` and `y` positions*
 
-### a pair of `x` and `y` positions
+### A pair of `x` and `y` positions
 
-A *pair* is *product type* [^2] and may be represented:
+A *pair* is a *product type*[^2] and may be represented:
 
-- as tuple
+* As tuple
 
   ```rust
   let as_tuple: (i32, i32) = (0, 0);
   ```
 
-- as struct
+* As struct
 
   ```rust
   pub struct Pos {
@@ -92,20 +92,20 @@ A *pair* is *product type* [^2] and may be represented:
 
 What do we choose?
 
-- from the perspective of memory consumption
-  - both take the same amount of memory
-    - for this matter, memory layout [^3] for `struct` does not matter: `#[repr(C)]` or default Rust alignment take the same space
+* From the perspective of memory consumption:
+  * Both take the same amount of memory
+    * For this matter, memory layout[^3] for `struct` does not matter: `#[repr(C)]` or default Rust alignment take the same space
 
-- from the perspective of usability
-  - tuple
+* From the perspective of usability:
+  * Tuple
 
     ```rust
     let pos = (0, 0);
     let x = pos.0; // access by index in the tuple
-    let x = pos.1; // access by index in the tuple
+    let y = pos.1; // access by index in the tuple
     ```
 
-  - struct
+  * Struct
 
     ```rust
     let pos = Pos { x: 0, y: 0}
@@ -113,15 +113,15 @@ What do we choose?
     let y = pos.y; // access by attribute name
     ```
 
-*`struct` wins from the perspective of usability.*, because naming is better than indexing.
+*`struct` wins from the perspective of usability*, because naming is better than indexing.
 
-### a sequence of pairs
+### A sequence of pairs
 
-> we don't care about modifications - we care about compression of the whole state
+> We don't care about modifications - we care about compression of the whole state
 
-So we won't use a mutable sequences like `Vec`, queues, etc.
+So we won't use mutable sequences like `Vec`, queues, etc.
 
-Let's pick **immutable slices** and be *consistent* to use this datastructure all the way.
+Let's pick **immutable slices** and be *consistent* to use this data structure all the way.
 
 Example:
 
@@ -137,19 +137,19 @@ let positions: &[Pos] = [
 
 ---
 
-**So we'll use immutable slices of sequences consisting of pairs of `x` and `y` coordinates represented as `i32` composed in `struct`'s named `Pos`.**
+**So we'll use immutable slices of sequences consisting of pairs of `x` and `y` coordinates represented as `i32` composed in `struct`s named `Pos`.**
 
-[^1]: Because: firstly, yet we don't even consider optimizations - we need to get stuff done; and secondly it's just *one of the views* on the same *data* - we could transform it for more convenience later. Later - when we'll deal with compression.
+[^1]: Because: firstly, we don't even consider optimizations yet - we need to get stuff done; and secondly it's just *one of the views* on the same *data* - we could transform it for more convenience later. Later - when we'll deal with compression.
 
 [^2]: [https://en.wikipedia.org/wiki/Product_type](https://en.wikipedia.org/wiki/Product_type)
 
 [^3]: [https://doc.rust-lang.org/reference/type-layout.html](https://doc.rust-lang.org/reference/type-layout.html)
 
-### Memory Estimations of Current Reprsentation
+### Memory Estimations of Current Representation
 
-An instance of `Pos` size is 2 `i32` sizes. So 2 * 4 bytes. 8 bytes.
+An instance of `Pos` size is 2 `i32` sizes. So 2 * 4 bytes = 8 bytes.
 
-The size of a sequence proportional to the size of a snake. And after the compression it will remain true as well.
+The size of a sequence is proportional to the size of a snake. And after the compression it will remain true as well.
 
 So the task is to find a more compressed `view` than *8 bytes * snake size*.
 
@@ -168,7 +168,7 @@ Well. Let's look once more at the first example.
 
 We see that a snake consists of connected points.
 
-If it were to go `Up` it would look like
+If it were to go `Up` it would look like:
 
 ```txt
     0 1 2 3 4 5 6
@@ -179,9 +179,9 @@ If it were to go `Up` it would look like
   4 . . . . . . .
 ```
 
-Interesting, so `Up` is a direction. Something that seems to have place in **our domain**.
+Interesting, so `Up` is a direction. Something that seems to have a place in **our domain**.
 
-Let's define a sum type [^4] - an enum in Rust:
+Let's define a sum type[^4] - an enum in Rust:
 
 ```rust
 pub enum Direction {
@@ -194,11 +194,11 @@ pub enum Direction {
 
 Could we define a snake just in terms of directions? No.
 
-But, if we keep the head (or tail) of snake as a starting point, we could define the rest of the snake a sequence of directions.
+But, if we keep the head (or tail) of the snake as a starting point, we could define the rest of the snake as a sequence of directions.
 
 And what's interesting about `Direction` is that there are *only* 4 choices to pick from. It screams - here's our optimization.
 
-So how many *bits*, we need to encode a `Direction`?
+So how many *bits* do we need to encode a `Direction`?
 
 ```txt
 ⌈log₂(n)⌉
@@ -210,7 +210,7 @@ where:
 
 So for `Direction`, for 4 choices: bits needed = ⌈log₂(4)⌉ = ⌈2⌉ = **2 bits**.
 
-Let's implement both encode and decode functions on `Direction`
+Let's implement both encode and decode functions on `Direction`:
 
 ```rust
 impl Direction {
@@ -235,9 +235,9 @@ impl Direction {
 }
 ```
 
-We use a `u8` since it's a built-in type and there ain't a `u2` built-in. Since it will act as an intermeditary value, it's ok.
+We use a `u8` since it's a built-in type and there isn't a `u2` built-in. Since it will act as an intermediary value, it's ok.
 
-Back to this example
+Back to this example:
 
 ```txt
     0 1 2 3 4 5 6
@@ -248,7 +248,7 @@ Back to this example
   4 . . . . . . .
 ```
 
-How we view a snake in terms of a starting point and consequent directions?
+How do we view a snake in terms of a starting point and consequent directions?
 
 ```rust
 let starting_position: Pos = Pos { x: 2, y: 1 };
@@ -258,7 +258,7 @@ let consequent_directions =
 
 So compared to the previous representation which took *8 bytes * 4 = 32 bytes*, this one takes *8 bytes + 2 bits \* 3 = 8.75 bytes*.
 
-And the longer a snake - more beneficial such optimization, since the starting point is most expensive.
+And the longer a snake - the more beneficial such optimization, since the starting point is the most expensive.
 
 [^4]: [https://en.wikipedia.org/wiki/Tagged_union](https://en.wikipedia.org/wiki/Tagged_union)
 
@@ -266,10 +266,10 @@ And the longer a snake - more beneficial such optimization, since the starting p
 
 There's no good reason to pack the starting point:
 
-- less reusable, because a starting point can take variable size, here we chose `i32`
-- coupling of compressable (`Direction`) and uncompressable (`Pos`) data
+* Less reusable, because a starting point can take variable size, here we chose `i32`
+* Coupling of compressible (`Direction`) and uncompressible (`Pos`) data
 
-> this article would not exist if the next bits of code \
+> This article would not exist if the next bits of code \
 > weren't already used in my project [snake](https://github.com/phantie/snake)
 
 ```rust
@@ -377,19 +377,19 @@ mod tests {
 
 ### Having all this we can
 
-- encode a snake having 2 values:
-  - starting position
-  - consequent directions
+* Encode a snake having 2 values:
+  * Starting position
+  * Consequent directions
 
-- decode a snake having 3 values:
-  - starting position
-  - what the packing function returned
-    - packed consequent directions (where the optimization lies)
-    - how many directions are in the last byte of packed directions
+* Decode a snake having 3 values:
+  * Starting position
+  * What the packing function returned:
+    * Packed consequent directions (where the optimization lies)
+    * How many directions are in the last byte of packed directions
 
 ## Our custom compression format is done
 
-And it's battletested in [snake](https://github.com/phantie/snake)
+And it's battle-tested in [snake](https://github.com/phantie/snake)
 
 ## So let's plot functions depending on snake size (growth) for memory consumption with and without our custom compression
 
@@ -406,16 +406,16 @@ y = 8 bytes * k
 A function with compression:
 
 ```txt
-y = max(0, sign(k)) * 8 bytes + ceil((k - 1) / 4) bytes + 1 bytes
+y = max(0, sign(k)) * 8 bytes + ceil((k - 1) / 4) bytes + 1 byte
 ```
 
 <!-- insert plot with k = 20 -->
 
 From this we can see that memory consumption with `k=20` is:
 
-- 160 bytes without compression
-- 14 bytes with compression (and benefits are more significant with larger `k`)
+* 160 bytes without compression
+* 14 bytes with compression (and benefits are more significant with larger `k`)
 
 ## Conclusion
 
-Rarely you solve really interesting problems (or challenge yourself this way), but coming up with your own compression algorithm is in the space of *interesting problems*. It brings a lot of satifaction, when it works. Especially as part of a larger process, that you can't even believe it, if it works from the first try.
+Rarely do you solve really interesting problems (or challenge yourself this way), but coming up with your own compression algorithm is in the space of *interesting problems*. It brings a lot of satisfaction when it works. Especially as part of a larger process, that you can't even believe it if it works from the first try.
