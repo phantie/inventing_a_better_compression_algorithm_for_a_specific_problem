@@ -4,7 +4,7 @@
 
 ## What domain are we entwined with for today?
 
-A game of snake. We are only interested that it can be represented as a sequence of coordinates on infinite integer space, where the first coordinate is the head of a snake.
+A game of snake. We are only interested that it can be represented as a sequence of coordinates on infinite (not really) integer space, where the first coordinate is the head of a snake.
 
 Each coordinate is a pair of numbers representing a position:
 
@@ -44,7 +44,7 @@ We need to decide on the *first*[^1] representation of this sequence in Rust.
 [(2,1), (3,1), (4,1), (4,2)]
 ```
 
-### Take a top-down approach at decomposing this representation
+## Take a top-down approach at decomposing this representation
 
 1. it's a sequence
 2. a sequence of pairs
@@ -54,7 +54,7 @@ We need to decide on the *first*[^1] representation of this sequence in Rust.
 
 From here we take a bottom-top approach:
 
-#### `x` position and `y` position
+### `x` position and `y` position
 
 - no reason for them to take differing amounts of memory
 - it must be in the space of both negative and positive numbers, so we have few *built-in* choices
@@ -71,14 +71,14 @@ From here we take a bottom-top approach:
 
 *So choose `i32` for both `x` and `y` positions*
 
-#### a pair of `x` and `y` positions
+### a pair of `x` and `y` positions
 
-A pair is product type [^2] and may be represented:
+A *pair* is *product type* [^2] and may be represented:
 
 - as tuple
 
   ```rust
-  (x, y)
+  let as_tuple: (i32, i32) = (0, 0);
   ```
 
 - as struct
@@ -113,9 +113,33 @@ What do we choose?
     let y = pos.y; // access by attribute name
     ```
 
-*`struct` wins from the perspective of usability.*
+*`struct` wins from the perspective of usability.*, because naming is better than indexing.
 
-[^1]: Because: firstly, yet we don't even consider optimizations - we need to get stuff done; and secondly it's just *one of the views* on the same *entity* - so we could transform it later for more convenience
+### a sequence of pairs
+
+> we don't care about modifications - we care about compression of the whole state
+
+So we won't use a mutable sequences like `Vec`, queues, etc.
+
+Let's pick **immutable slices** and be *consistent* to use this datastructure all the way.
+
+Example:
+
+```rust
+let positions: &[Pos] = [
+    Pos { x: 0, y: 0 },
+    Pos { x: 1, y: 1 },
+    Pos { x: 2, y: 2 },
+    Pos { x: 3, y: 3 },
+]
+.as_slice();
+```
+
+---
+
+**So we'll use immutable slices of sequences consisting of pairs of `x` and `y` coordinates represented as `i32` composed in `struct`'s named `Pos`.**
+
+[^1]: Because: firstly, yet we don't even consider optimizations - we need to get stuff done; and secondly it's just *one of the views* on the same *entity* - we could transform it for more convenience later. Later - when we'll deal with compression.
 
 [^2]: [https://en.wikipedia.org/wiki/Product_type](https://en.wikipedia.org/wiki/Product_type)
 
