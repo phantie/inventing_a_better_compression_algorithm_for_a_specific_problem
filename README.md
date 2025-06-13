@@ -186,7 +186,7 @@ Let's define a sum type [^4] - an enum in Rust:
 ```rust
 pub enum Direction {
     Up,
-    Bottom,
+    Down,
     Left,
     Right,
 }
@@ -217,7 +217,7 @@ impl Direction {
     pub fn encode(&self) -> u8 {
         match self {
             Self::Up => 0b00,
-            Self::Bottom => 0b01,
+            Self::Down => 0b01,
             Self::Left => 0b10,
             Self::Right => 0b11,
         }
@@ -226,7 +226,7 @@ impl Direction {
     pub fn decode(value: u8) -> Option<Self> {
         match value {
             0b00 => Some(Self::Up),
-            0b01 => Some(Self::Bottom),
+            0b01 => Some(Self::Down),
             0b10 => Some(Self::Left),
             0b11 => Some(Self::Right),
             _ => None,
@@ -236,5 +236,28 @@ impl Direction {
 ```
 
 We use a `u8` since it's a built-in type and there ain't a `u2` built-in. Since it will act as an intermeditary value, it's ok.
+
+Back to this example
+
+```txt
+    0 1 2 3 4 5 6
+  0 . . . . . . .
+  1 . . H ● ● . .
+  2 . . . . ● . .
+  3 . . . . . . .
+  4 . . . . . . .
+```
+
+How we view a snake in terms of a starting point and consequent directions?
+
+```rust
+let starting_position: Pos = Pos { x: 2, y: 1 };
+let consequent_directions =
+    [Direction::Right, Direction::Right, Direction::Down].as_slice();
+```
+
+So compared to the previous representation which took *8 bytes * 4 = 32 bytes*, this one takes *8 bytes + 2 bits \* 3 = 8.75 bytes*.
+
+And the longer a snake - more beneficial such optimization, since the starting point is most expensive.
 
 [^4]: [https://en.wikipedia.org/wiki/Tagged_union](https://en.wikipedia.org/wiki/Tagged_union)

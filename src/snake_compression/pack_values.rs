@@ -39,7 +39,7 @@ mod tests {
     #[test]
     fn test_pack_values() {
         assert_eq!(
-            pack_values(&[Direction::Up, Direction::Right, Direction::Bottom]),
+            pack_values(&[Direction::Up, Direction::Right, Direction::Down]),
             vec![0b00_11_01_00]
         );
     }
