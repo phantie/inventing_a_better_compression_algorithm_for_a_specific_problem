@@ -1,5 +1,8 @@
 {
     "conventionalCommits.scopes": [
         "readme.md"
-    ]
+    ],
+    "[markdown]": {
+        "editor.tabSize": 2
+    },
 }

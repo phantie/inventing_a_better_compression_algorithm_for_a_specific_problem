@@ -28,10 +28,47 @@ Consider this snake on a grid:
   4 . . . . . . .
 ```
 
-This snake is represented as:
+This snake is represented as where H is the head and ● represents body segments:
 
 ```python
 [(2,1), (3,1), (4,1), (4,2)]
 ```
 
-where H is the head and ● represents body segments.
+But what how much memory it takes?
+
+#### Sailing to the land of Rusty Crabs
+
+We need to decide on the *first*[^1] representation of this sequence in Rust.
+
+```python
+[(2,1), (3,1), (4,1), (4,2)]
+```
+
+Take a top-down approach at decomposing this representation:
+
+1. it's a sequence
+2. a sequence of pairs
+3. a pair of `x` and `y` positions
+4. `x` position
+5. `y` position
+
+From here we take a bottom-top approach:
+
+##### `x` position and `y` position
+
+- no reason for them to take differing amounts of memory
+- it must be in the space of both negative and positive numbers, so we have few *built-in* choices
+  - `isize`: pointer-sized signed integer (32-bit on 32-bit systems, 64-bit on 64-bit systems)
+    - type not to be used in this context
+  - `i8`: 8-bit signed integer (-128 to 127)
+    - likely too small
+  - `i16`: 16-bit signed integer (-32,768 to 32,767)
+    - might suffice, but risky if requirements change
+  - `i32`: 32-bit signed integer (-2,147,483,648 to 2,147,483,647)
+    - sweet spot
+  - `i64`: 64-bit signed integer (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807
+    - clearly too large
+
+So choose `i32` for both `x` and `y` positions
+
+[^1]: Because: firstly, yet we don't even consider optimizations - we need to get stuff done; and secondly it's just *one of the views* on the same *entity* - so we could transform it later for more convenience
