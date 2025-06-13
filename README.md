@@ -66,9 +66,57 @@ From here we take a bottom-top approach:
     - might suffice, but risky if requirements change
   - `i32`: 32-bit signed integer (-2,147,483,648 to 2,147,483,647)
     - sweet spot
-  - `i64`: 64-bit signed integer (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807
+  - `i64`: 64-bit signed integer (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807)
     - clearly too large
 
-So choose `i32` for both `x` and `y` positions
+*So choose `i32` for both `x` and `y` positions*
+
+##### a pair of `x` and `y` positions
+
+A pair is product type [^2] and may be represented:
+
+- as tuple
+
+  ```rust
+  (x, y)
+  ```
+
+- as struct
+
+  ```rust
+  pub struct Pos {
+      pub x: i32,
+      pub y: i32,
+  }
+  ```
+
+What do we choose?
+
+- from the perspective of memory consumption
+  - both take the same amount of memory
+    - for this matter, memory layout [^3] for `struct` does not matter: `#[repr(C)]` or default Rust alignment take the same space
+
+- from the perspective of usability
+  - tuple
+
+    ```rust
+    let pos = (0, 0);
+    let x = pos.0; // access by index in the tuple
+    let x = pos.1; // access by index in the tuple
+    ```
+
+  - struct
+
+    ```rust
+    let pos = Pos { x: 0, y: 0}
+    let x = pos.x; // access by attribute name
+    let y = pos.y; // access by attribute name
+    ```
+
+*`struct` wins from the perspective of usability.*
 
 [^1]: Because: firstly, yet we don't even consider optimizations - we need to get stuff done; and secondly it's just *one of the views* on the same *entity* - so we could transform it later for more convenience
+
+[^2]: [https://en.wikipedia.org/wiki/Product_type](https://en.wikipedia.org/wiki/Product_type)
+
+[^3]: [https://doc.rust-lang.org/reference/type-layout.html](https://doc.rust-lang.org/reference/type-layout.html)
