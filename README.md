@@ -139,8 +139,102 @@ let positions: &[Pos] = [
 
 **So we'll use immutable slices of sequences consisting of pairs of `x` and `y` coordinates represented as `i32` composed in `struct`'s named `Pos`.**
 
-[^1]: Because: firstly, yet we don't even consider optimizations - we need to get stuff done; and secondly it's just *one of the views* on the same *entity* - we could transform it for more convenience later. Later - when we'll deal with compression.
+[^1]: Because: firstly, yet we don't even consider optimizations - we need to get stuff done; and secondly it's just *one of the views* on the same *data* - we could transform it for more convenience later. Later - when we'll deal with compression.
 
 [^2]: [https://en.wikipedia.org/wiki/Product_type](https://en.wikipedia.org/wiki/Product_type)
 
 [^3]: [https://doc.rust-lang.org/reference/type-layout.html](https://doc.rust-lang.org/reference/type-layout.html)
+
+### Memory Estimations of Current Reprsentation
+
+An instance of `Pos` size is 2 `i32` sizes. So 2 * 4 bytes. 8 bytes.
+
+The size of a sequence proportional to the size of a snake. And after the compression it will remain true as well.
+
+So the task is to find a more compressed `view` than *8 bytes * snake size*.
+
+## How domain knowledge might help to optimize the memory consumption?
+
+Well. Let's look once more at the first example.
+
+```txt
+    0 1 2 3 4 5 6
+  0 . . . . . . .
+  1 . . H ● ● . .
+  2 . . . . ● . .
+  3 . . . . . . .
+  4 . . . . . . .
+```
+
+We see that a snake consists of connected points.
+
+If it were to go `Up` it would look like
+
+```txt
+    0 1 2 3 4 5 6
+  0 . . H . . . .
+  1 . . ● ● ● . .
+  2 . . . . . . .
+  3 . . . . . . .
+  4 . . . . . . .
+```
+
+Interesting, so `Up` is a direction. Something that seems to have place in **our domain**.
+
+Let's define a sum type [^4] - an enum in Rust:
+
+```rust
+pub enum Direction {
+    Up,
+    Bottom,
+    Left,
+    Right,
+}
+```
+
+Could we define a snake just in terms of directions? No.
+
+But, if we keep the head (or tail) of snake as a starting point, we could define the rest of the snake a sequence of directions.
+
+And what's interesting about `Direction` is that there are *only* 4 choices to pick from. It screams - here's our optimization.
+
+So how many *bits*, we need to encode a `Direction`?
+
+```txt
+⌈log₂(n)⌉
+
+where:
+- n = number of possible values
+- ⌈ ⌉ = ceiling function (round up to nearest integer)
+```
+
+So for `Direction`, for 4 choices: bits needed = ⌈log₂(4)⌉ = ⌈2⌉ = **2 bits**.
+
+Let's implement both encode and decode functions on `Direction`
+
+```rust
+impl Direction {
+    pub fn encode(&self) -> u8 {
+        match self {
+            Self::Up => 0b00,
+            Self::Bottom => 0b01,
+            Self::Left => 0b10,
+            Self::Right => 0b11,
+        }
+    }
+
+    pub fn decode(value: u8) -> Option<Self> {
+        match value {
+            0b00 => Some(Self::Up),
+            0b01 => Some(Self::Bottom),
+            0b10 => Some(Self::Left),
+            0b11 => Some(Self::Right),
+            _ => None,
+        }
+    }
+}
+```
+
+We use a `u8` since it's a built-in type and there ain't a `u2` built-in. Since it will act as an intermeditary value, it's ok.
+
+[^4]: [https://en.wikipedia.org/wiki/Tagged_union](https://en.wikipedia.org/wiki/Tagged_union)
