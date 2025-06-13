@@ -15,7 +15,7 @@ Each coordinate is a pair of numbers representing a position:
 (2, 1)  # means X = 2, Y = 1
 ```
 
-### Let's take this example to demonstrate typical enconding
+## Let's take this example to demonstrate typical enconding
 
 Consider this snake on a grid:
 
@@ -36,7 +36,7 @@ This snake is represented as where H is the head and ● represents body segment
 
 But what how much memory it takes?
 
-#### Sailing to the land of Rusty Crabs
+## Sailing to the land of Rusty Crabs
 
 We need to decide on the *first*[^1] representation of this sequence in Rust.
 
@@ -44,7 +44,7 @@ We need to decide on the *first*[^1] representation of this sequence in Rust.
 [(2,1), (3,1), (4,1), (4,2)]
 ```
 
-Take a top-down approach at decomposing this representation:
+### Take a top-down approach at decomposing this representation
 
 1. it's a sequence
 2. a sequence of pairs
@@ -54,7 +54,7 @@ Take a top-down approach at decomposing this representation:
 
 From here we take a bottom-top approach:
 
-##### `x` position and `y` position
+#### `x` position and `y` position
 
 - no reason for them to take differing amounts of memory
 - it must be in the space of both negative and positive numbers, so we have few *built-in* choices
@@ -71,7 +71,7 @@ From here we take a bottom-top approach:
 
 *So choose `i32` for both `x` and `y` positions*
 
-##### a pair of `x` and `y` positions
+#### a pair of `x` and `y` positions
 
 A pair is product type [^2] and may be represented:
 
