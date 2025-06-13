@@ -269,6 +269,9 @@ There's no good reason to pack the starting point:
 - less reusable, because a starting point can take variable size, here we chose `i32`
 - coupling of compressable (`Direction`) and uncompressable (`Pos`) data
 
+> this article would not exist if the next bits of code \
+> weren't already used in my project [snake](https://github.com/phantie/snake)
+
 ```rust
 type DirectionsInLastByte = u8;
 
@@ -380,9 +383,35 @@ mod tests {
 
 - decode a snake having 3 values:
   - starting position
-  - packed consequent directions (where the optimization lies)
-  - how many directions are in the last byte of packed directions
+  - what the packing function returned
+    - packed consequent directions (where the optimization lies)
+    - how many directions are in the last byte of packed directions
 
 ## Our custom compression format is done
 
-...
+And it's battletested in [snake](https://github.com/phantie/snake)
+
+## So let's plot functions depending on snake size (growth) for memory consumption with and without our custom compression
+
+`k` is a length (growth) of a snake
+
+A function without compression:
+
+```txt
+y = 8 bytes * k
+```
+
+<!-- insert plot with k = 20 -->
+
+A function with compression:
+
+```txt
+y = max(0, sign(k)) * 8 bytes + ceil((k - 1) / 4) bytes + 1 bytes
+```
+
+<!-- insert plot with k = 20 -->
+
+From this we can see that memory consumption with `k=20` is:
+
+- 160 bytes without compression
+- 14 bytes with compression (and benefits are more significant with larger `k`)
