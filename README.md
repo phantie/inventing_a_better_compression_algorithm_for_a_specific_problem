@@ -272,6 +272,8 @@ There's no good reason to pack the starting point:
 > This article would not exist if the next bits of code \
 > weren't already used in my project [snake](https://github.com/phantie/snake)
 
+***The purpose of this article is more to learn to think about problems and solve them than to use bit operations.***
+
 ```rust
 type DirectionsInLastByte = u8;
 
