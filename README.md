@@ -147,11 +147,11 @@ let positions: &[Pos] = [
 
 ### Memory Estimations of Current Representation
 
-An instance of `Pos` size is 2 `i32` sizes. So 2 * 4 bytes = 8 bytes.
+An instance of `Pos` size is 2 `i32` sizes. So *2 * 4 bytes = 8 bytes*.
 
 The size of a sequence is proportional to the size of a snake. And after the compression it will remain true as well.
 
-So the task is to find a more compressed `view` than *8 bytes * snake size*.
+So the task is to find a more compressed *view* than *8 bytes * snake size*.
 
 ## How domain knowledge might help to optimize the memory consumption?
 
@@ -413,8 +413,8 @@ y = max(0, sign(k)) * 8 bytes + ceil((k - 1) / 4) bytes + 1 byte
 
 From this we can see that memory consumption with `k=20` is:
 
-* 160 bytes without compression
-* 14 bytes with compression (and benefits are more significant with larger `k`)
+* *160 bytes* without compression
+* *14 bytes* with compression (and benefits are more significant with larger `k`)
 
 ## Conclusion
 
